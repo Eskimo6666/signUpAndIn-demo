@@ -62,6 +62,7 @@ var server = http.createServer(function (request, response) {
             let { dub, email, password } = hash
             console.log(email)
             if (email.indexOf('@') === -1) {
+                response.setHeader('Content-Type','application/json;chraset:utf-8')
                 response.statusCode = 400
                 response.write(`{
                     "errors":{"email":"invalid"}
