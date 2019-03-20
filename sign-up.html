@@ -44,9 +44,14 @@
             $.post('./sign-up', hash)
                 .then((response) => {
                     console.log(response)
-                }), () => {
-                    console.log('fail')
-                }
+                }, (request) => {
+                  let object = JSON.parse(request.responseText)
+                  console.log(object)
+                  //let {error} = object
+                 // let {errors} = JSON.parse(request.responseText)
+                  //console.log(errors)
+                })
+                
         })
 
     </script>
