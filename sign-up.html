@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <title>Document</title>
+</head>
+
+<body>
+    <form id='signUpForm'>
+        <h1>注册</h1>
+        <div class="row">
+            <label for="">昵称</label>
+            <input type="text" name="dub">
+        </div>
+        <div class="row">
+            <label for="">邮箱</label>
+            <input type="text" name="email">
+        </div>
+        <div class="row">
+            <label for="">密码</label>
+            <input type="text" name='password'>
+        </div>
+        <div class="row">
+            <input type="submit" value="提交">
+        </div>
+    </form>
+    <script>
+        let hash = {}
+        $("#signUpForm").on('submit', (e) => {
+            e.preventDefault()
+            let need = ['dub', 'email', 'password']
+            need.forEach((name) => {
+                //console.log(name)
+                let value = $('#signUpForm').find(`[name=${name}]`).val()
+                //console.log(value)
+                hash[name] = value               
+            })
+            console.log(hash)
+            $.post('./sign-up', hash)
+                .then(() => {
+                    console.log('success')
+                }), () => {
+                    console.log('fail')
+                }
+        })
+
+    </script>
+    <style>
+        form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        label {
+            display: block;
+            width: 4em;
+        }
+
+        div {
+            display: flex;
+            margin: 10px;
+        }
+    </style>
+</body>
+
+</html>
