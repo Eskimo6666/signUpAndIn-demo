@@ -40,16 +40,18 @@ var server = http.createServer(function(request, response){
     response.setHeader('Content-Type', 'text/javascript; charset=utf-8')
     response.write('alert("这是JS执行的")')
     response.end()
-  }else if(path === '/sign-up'){
+  }else if(path === '/sign-up' && method === "GET"){
     let string = fs.readFileSync('./sign-up.html','utf-8')
     response.statusCode = 200
     response.setHeader('Content-Type','text/html,charset:utf-8')
     response.write(string)
     response.end()
   }else if(path === '/sign-up' && method === "POST"){
-    readBody(request).then((body)=>{
-      console.log(body)
-    })
+    response.statusCode = 200
+   readBody(request).then((body)=>{
+       console.log(body)
+   })
+    response.end()
   }else if(path == '/'){
     response.setHeader('Content-Type', 'text/html; charset=utf-8')
     response.write('<!DOCTYPE>\n<html>'  + 

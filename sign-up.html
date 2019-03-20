@@ -42,8 +42,8 @@
             })
             console.log(hash)
             $.post('./sign-up', hash)
-                .then(() => {
-                    console.log('success')
+                .then((response) => {
+                    console.log(response)
                 }), () => {
                     console.log('fail')
                 }
