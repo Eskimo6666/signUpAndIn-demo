@@ -62,26 +62,112 @@ var server = http.createServer(function (request, response) {
             let { dub, email, password } = hash
             console.log(email)
             if (email.indexOf('@') === -1) {
-                response.setHeader('Content-Type','application/json;chraset:utf-8')
+                response.setHeader('Content-Type', 'application/json;chraset:utf-8')
                 response.statusCode = 400
                 response.write(`{
                     "errors":{"email":"invalid"}
                 }`)
             } else {
-                response.statusCode = 200
+                var users = fs.readFileSync("./db/users", 'utf8')
+                try {
+                    users = JSON.parse(users)  //把字符串转换成数组                
+                } catch (exception) {
+                    users = []
+                }
+                let inUse = false
+                for (let i = 0; i < users.length; i++) {
+                    let user = users[i]
+                    if (user.email === email) {
+                        inUse = true
+                        break;
+                    }
+                }
+                if (inUse) {
+                    response.statusCode = 400
+                    response.write('email in use')
+                } else {
+                    users.push({ email: email, password: password })  //push对象到数组里面
+                    var stringUsers = JSON.stringify(users)
+                    fs.writeFileSync('./db/users', stringUsers)
+                    response.statusCode = 200
+                }
             }
             response.end()
         })
+    } else if (path === '/sign-in' && method === "GET") {
+        let string = fs.readFileSync('./sign-in.html', 'utf-8')
+        response.statusCode = 200
+        response.setHeader('Content-Type', 'text/html,charset:utf-8')
+        response.write(string)
+        response.end()
+    } else if (path === '/sign-in' && method === "POST") {
+        //response.statusCode = 200
+        readBody(request).then((body) => {
+            let strings = body.split('&')
+            
+            let hash = {}
+            strings.forEach((string) => {
+                let parts = string.split('=')
+                let key = parts[0]
+                let value = parts[1]
+                hash[key] = decodeURIComponent(value)
+            })
+            let {email, password } = hash
+            console.log(email)
+            console.log(password)
+            
+            var users = fs.readFileSync("./db/users", 'utf8')
+            try {
+                users = JSON.parse(users)  //把字符串转换成数组                
+            } catch (exception) {
+                users = []
+            }
+            let found
+            for(let i=0;i<users.length;i++){
+                if(users[i].email === email &&users[i].password === password){
+                    found = true
+                    break;
+                }
+            }
+            if(found){
+                response.setHeader('Set-Cookie',`sign_in_email = ${email}`)
+                response.statusCode = 200
+            }else{
+                response.statusCode = 401
+            }
+            response.end()
 
-        
+        })
     } else if (path == '/') {
+        let string = fs.readFileSync('./main.html', 'utf-8')
+        let cookies = request.headers.cookie.split(';')
+        let hash={}
+        for(let i=0;i<cookies.length; i++){
+            let parts = cookies[i].split('=')
+            let key = parts[0]
+            let value = parts[1]
+            hash[key] = value
+        }
+        let email = hash.sign_in_email
+        let users = fs.readFileSync('./db/users','utf8')
+        users = JSON.parse(users)
+        let foundUser
+        for(let i=0;i<users.length;i++){
+           if(users[i].email === email){
+             foundUser =users[i]
+            break;
+           }
+        }
+        console.log(foundUser)
+        if(foundUser){
+            string = string.replace('__password__',foundUser.password)
+        }else{
+            string = string.replace('__password__','不知道')
+        }     
         response.setHeader('Content-Type', 'text/html; charset=utf-8')
-        response.write('<!DOCTYPE>\n<html>' +
-            '<head><link rel="stylesheet" href="/style.css">' +
-            '</head><body>' +
-            '<h1>你好</h1>' +
-            '<script src="/main.js"></script>' +
-            '</body></html>')
+        response.write(string)
+   
+        response.statusCode = 200
         response.end()
     } else {
         response.statusCode = 404
